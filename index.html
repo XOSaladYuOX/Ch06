@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>井字棋 Tic-Tac-Toe｜HW06</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>井字棋 <span>Tic-Tac-Toe</span></h1>
+      <p class="sub">你是 <b class="x">X</b>（先手），電腦是 <b class="o">O</b>（後手）——電腦永遠不會輸！</p>
+    </header>
+
+    <section class="scoreboard" aria-label="戰績">
+      <div class="score x"><span class="label">你 (X)</span><span id="score-x" class="num">0</span></div>
+      <div class="score draw"><span class="label">平手</span><span id="score-draw" class="num">0</span></div>
+      <div class="score o"><span class="label">電腦 (O)</span><span id="score-o" class="num">0</span></div>
+    </section>
+
+    <div id="status" class="status" aria-live="polite">輪到你下棋</div>
+
+    <div class="board-wrap">
+      <div id="board" class="board" role="grid" aria-label="棋盤"></div>
+      <svg id="win-line" class="win-line" viewBox="0 0 300 300" aria-hidden="true">
+        <line id="win-stroke" x1="0" y1="0" x2="0" y2="0"></line>
+      </svg>
+    </div>
+
+    <div class="controls">
+      <button id="restart" class="btn">重新開始</button>
+      <button id="reset-score" class="btn ghost">清除戰績</button>
+    </div>
+
+    <ol id="history" class="history" aria-label="下棋紀錄"></ol>
+
+    <footer>1142927 HW06 · 電腦採用 Minimax 演算法，保證不敗</footer>
+  </main>
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+  <script src="script.js"></script>
+</body>
+</html>
