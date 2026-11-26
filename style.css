@@ -1,0 +1,210 @@
+:root {
+  --bg1: #1e1b4b;
+  --bg2: #0f172a;
+  --card: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.18);
+  --x: #38bdf8;
+  --o: #f472b6;
+  --draw: #facc15;
+  --text: #e2e8f0;
+  --size: min(84vw, 360px);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at 20% 10%, var(--bg1), var(--bg2) 70%);
+  background-attachment: fixed;
+}
+
+.app {
+  width: 100%;
+  max-width: 480px;
+  padding: 24px 16px 40px;
+  text-align: center;
+}
+
+h1 { margin: 0 0 4px; font-size: 2rem; letter-spacing: 2px; }
+h1 span { font-size: 1rem; opacity: .6; font-weight: 400; }
+.sub { margin: 0 0 18px; opacity: .85; }
+.x { color: var(--x); }
+.o { color: var(--o); }
+
+/* ---------- 計分板 ---------- */
+.scoreboard { display: flex; gap: 10px; justify-content: center; margin-bottom: 14px; }
+.score {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 4px;
+  display: flex; flex-direction: column;
+  transition: transform .3s, box-shadow .3s;
+}
+.score .label { font-size: .8rem; opacity: .75; }
+.score .num { font-size: 1.6rem; font-weight: 700; }
+.score.x .num { color: var(--x); }
+.score.o .num { color: var(--o); }
+.score.draw .num { color: var(--draw); }
+.score.bump { animation: bump .5s ease; }
+@keyframes bump { 40% { transform: scale(1.18); } }
+.score.active { box-shadow: 0 0 0 2px var(--x) inset; }
+.score.o.active { box-shadow: 0 0 0 2px var(--o) inset; }
+
+/* ---------- 狀態 ---------- */
+.status {
+  min-height: 1.6em;
+  font-size: 1.15rem;
+  margin-bottom: 14px;
+  transition: color .3s;
+}
+.status.thinking::after {
+  content: "";
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+  animation: dots 1.2s steps(4, end) infinite;
+}
+@keyframes dots {
+  0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; }
+}
+.status.win { color: var(--x); }
+.status.lose { color: var(--o); }
+.status.draw { color: var(--draw); }
+
+/* ---------- 棋盤 ---------- */
+.board-wrap { position: relative; width: var(--size); height: var(--size); margin: 0 auto; }
+.board {
+  width: 100%; height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px;
+  background: var(--line);
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.45);
+  animation: boardIn .6s cubic-bezier(.2,1.4,.4,1);
+}
+@keyframes boardIn { from { transform: scale(.6) rotate(-8deg); opacity: 0; } }
+.board.shake { animation: shake .5s; }
+@keyframes shake {
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.cell {
+  position: relative;
+  border: none;
+  border-radius: 12px;
+  background: #1e293b;
+  cursor: pointer;
+  padding: 0;
+  transition: background .2s, transform .15s;
+}
+.cell:not(.filled):hover { background: #273449; transform: scale(.97); }
+.cell:focus-visible { outline: 3px solid var(--x); outline-offset: -3px; }
+.board.locked .cell { cursor: not-allowed; }
+.cell.filled { cursor: default; }
+.cell.dim { opacity: .35; transition: opacity .5s; }
+.cell.highlight { background: #334155; animation: pulse 1s ease-in-out infinite alternate; }
+@keyframes pulse { to { box-shadow: 0 0 22px rgba(255,255,255,.35) inset; } }
+
+/* 滑鼠懸停時顯示預覽 X */
+.cell:not(.filled) .ghost { opacity: 0; transition: opacity .2s; }
+.board:not(.locked) .cell:not(.filled):hover .ghost { opacity: .25; }
+
+.cell svg { width: 70%; height: 70%; position: absolute; inset: 15%; overflow: visible; }
+.mark { fill: none; stroke-width: 12; stroke-linecap: round; }
+.mark.x { stroke: var(--x); filter: drop-shadow(0 0 6px var(--x)); }
+.mark.o { stroke: var(--o); filter: drop-shadow(0 0 6px var(--o)); }
+
+/* 筆畫動畫：用 stroke-dasharray 畫出棋子 */
+.draw-in {
+  stroke-dasharray: var(--len);
+  stroke-dashoffset: var(--len);
+  animation: drawStroke .35s ease-out forwards;
+}
+.draw-in.second { animation-delay: .18s; }
+@keyframes drawStroke { to { stroke-dashoffset: 0; } }
+.pop { animation: pop .4s cubic-bezier(.2,1.6,.4,1); }
+@keyframes pop { from { transform: scale(.4); } }
+
+/* ---------- 勝利連線 ---------- */
+.win-line { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.win-line line {
+  stroke: #fff;
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  opacity: 0;
+  filter: drop-shadow(0 0 8px #fff);
+}
+.win-line.show line { opacity: .9; animation: drawStroke .6s ease-out .1s forwards; }
+
+/* ---------- 按鈕 ---------- */
+.controls { display: flex; gap: 10px; justify-content: center; margin: 20px 0 12px; }
+.btn {
+  font: inherit;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, var(--x), var(--o));
+  color: #0f172a;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s, filter .15s;
+}
+.btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.btn:active { transform: translateY(1px); }
+.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+
+/* ---------- 紀錄 ---------- */
+.history {
+  list-style: none;
+  padding: 0;
+  margin: 8px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  font-size: .85rem;
+  min-height: 1.8em;
+}
+.history li {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 2px 8px;
+  animation: slideIn .3s ease-out;
+}
+.history li.x { color: var(--x); }
+.history li.o { color: var(--o); }
+@keyframes slideIn { from { transform: translateY(-8px); opacity: 0; } }
+
+footer { margin-top: 26px; font-size: .8rem; opacity: .5; }
+
+/* ---------- 彩帶 ---------- */
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.confetti i {
+  position: absolute;
+  top: -12px;
+  width: 8px; height: 14px;
+  border-radius: 2px;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  to { transform: translateY(105vh) rotate(720deg); opacity: .2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; }
+}
