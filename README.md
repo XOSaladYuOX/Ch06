@@ -8,7 +8,7 @@
 
 ## 二、執行方式
 - 線上遊玩（需先在 GitHub 的 Settings → Pages 啟用，Branch 選擇存放本程式的分支、資料夾 `/ (root)`）：
-  `https://xoyoulinox.github.io/Ch06/`
+  `https://xosaladyuox.github.io/Ch06/`
 - 本機遊玩：下載後直接用瀏覽器開啟 `index.html` 即可，不需要安裝任何套件。
 
 ## 三、檔案結構
